@@ -1,4 +1,3 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
 import { getAuth, signInAnonymously, onAuthStateChanged, deleteUser } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { getDatabase, ref, set, get, push, onValue, onDisconnect, remove, onChildAdded, update, onChildRemoved } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
@@ -16,14 +15,11 @@ const firebaseConfig = {
   messagingSenderId: "261231723787",
   appId: "1:261231723787:web:a2f121380bfd3b8b7b4e0e"
 };
-
-// Initialize Firebase
+// initialize firebase
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const database = getDatabase(app);
-
-
 // Game variables
 const gameContainer = document.getElementById("game-container");
 
