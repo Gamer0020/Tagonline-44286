@@ -12,13 +12,13 @@ body {
 
 .menu-container {
     width: 500px;
-    height: 200px;
+    height: 300px; /* Augmenté la hauteur pour un meilleur rendu */
     display: flex;
     flex-direction: column;
     align-items: center;
     backdrop-filter: blur(19px) saturate(200%);
     -webkit-backdrop-filter: blur(19px) saturate(200%);
-    background-color: rgba(255, 255, 255, 1);
+    background-color: rgba(255, 255, 255, 0.8); /* Un peu transparent pour plus d'effet */
     border-radius: 12px;
     border: 1px solid rgba(209, 213, 219, 0.3);   
     padding-bottom: 20px; 
@@ -28,6 +28,7 @@ body {
     font-size: 36px;
     font-weight: bold;
     margin-bottom: 20px;
+    color: #333; /* Assurer une meilleure visibilité du texte */
 }
 
 .card {
@@ -41,7 +42,6 @@ body {
 }
 
 .play-button {
-    padding-bottom: 200px;
     width: 200px;
     height: 50px;
     display: flex;
@@ -61,4 +61,9 @@ body {
 .play-button::before {
     content: '▶'; /* Icône Play */
     font-size: 24px; /* Taille de l'icône ajustée */
+}
+
+.play-button:hover {
+    background-color: #ffcc00; /* Changement de couleur au survol */
+    transition: background-color 0.3s ease;
 }
