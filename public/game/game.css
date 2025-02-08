@@ -15,7 +15,7 @@ body {
 }
 
 #arrows-container {
-    position: relative;
+    position: absolute;
     height: 500px;
     width: 500px;
 }
@@ -34,5 +34,4 @@ body {
     height: 100px;
     position: relative;
     left: 100px;
-    display: none;
 }
