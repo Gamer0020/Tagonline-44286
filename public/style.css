@@ -1,0 +1,38 @@
+body {
+    background-color: #00ffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+}
+
+#game-container {
+    background-color: white;
+    box-shadow: 0 0 20px rgb(63, 61, 61);
+    border-radius: 3px;
+    margin-top: 10px;
+}
+
+#arrows-container {
+    position: relative;
+    height: 500px;
+    width: 500px;
+}
+
+.player {
+    background-color: yellow;
+    border: 2px black solid;
+    position: absolute;
+    transition: transform 0.2s;
+    border-radius: 3px;
+}
+
+.arrow {
+    background-image: url('assets/Arrow.ico');
+    width: 100px;
+    height: 100px;
+    position: relative;
+    left: 100px;
+    display: none;
+}
