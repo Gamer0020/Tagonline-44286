@@ -5,14 +5,160 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="menu.css">
     <link rel="shortcut icon" href="assets/favicon.ico" type="image/x-icon">
-    <title>Tag Online</title>
+    <title>TagOnline</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #00ffff;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            position: relative;
+            overflow: hidden; 
+        }
+
+        .menu-container {
+            width: 500px;
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            backdrop-filter: blur(19px) saturate(200%);
+            -webkit-backdrop-filter: blur(19px) saturate(200%);
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            border: 1px solid rgba(209, 213, 219, 0.3);
+            padding-bottom: 20px;
+            position: relative;
+            z-index: 1; 
+        }
+
+        .game-title {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .play-button {
+            width: 200px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 10px 20px;
+            font-size: 24px;
+            color: rgb(0, 0, 0);
+            background: yellow;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .play-button::before {
+            content: '▶';
+            font-size: 24px;
+        }
+
+        .play-button:hover {
+            background-color: #ffcc00;
+            transition: background-color 0.3s ease;
+        }
+
+        .rain-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0; /* Derrière les autres éléments */
+        }
+
+        .cube {
+            position: absolute;
+            background: yellow;
+            border: 2px solid black;
+            opacity: 1; /* Aucun mélange avec le fond */
+        }
+
+    </style>
 </head>
 <body>
+    <!-- Pluie de cubes -->
+    <div class="rain-container" id="rain-container"></div>
+
+    <!-- Contenu du menu -->
     <div class="menu-container">
         <h1 class="game-title">TagOnline</h1>
         <div class="card">
-            <a href="./game/game.html" class="play-button">Jouer</a>
+            <a href="game/game.html" class="play-button">Jouer</a>
         </div>
     </div>
+
+    <script>
+       
+        function generateCubes() {
+            const rainContainer = document.getElementById('rain-container');
+            const numCubes = 50;  
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+
+         
+            for (let i = 0; i < numCubes; i++) {
+                const cube = document.createElement('div');
+                cube.classList.add('cube');
+
+                
+                const size = Math.random() * 20 + 10; 
+                cube.style.width = `${size}px`;
+                cube.style.height = `${size}px`;
+
+                
+                const leftPosition = Math.random() * screenWidth;
+                cube.style.left = `${leftPosition}px`;
+
+                
+                const fallDuration = Math.random() * 3 + 5; 
+                cube.style.animation = `fall ${fallDuration}s linear infinite`;
+
+                
+                rainContainer.appendChild(cube);
+            }
+        }
+
+       
+        document.styleSheets[0].insertRule(`
+            @keyframes fall {
+                0% {
+                    transform: translateY(-100px);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translateY(${window.innerHeight + 100}px);
+                    opacity: 1;
+                }
+            }
+        `, 0);
+
+        
+        window.onload = generateCubes;
+    </script>
 </body>
 </html>
