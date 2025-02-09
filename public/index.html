@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="menu.css">
     <link rel="shortcut icon" href="assets/favicon.ico" type="image/x-icon">
     <title>TagOnline</title>
     <style>
@@ -120,26 +119,25 @@
             const screenWidth = window.innerWidth;
             const screenHeight = window.innerHeight;
 
-         
             for (let i = 0; i < numCubes; i++) {
-                const cube = document.createElement('div');
-                cube.classList.add('cube');
+                setTimeout(() => {
 
-                
-                const size = Math.random() * 20 + 10; 
-                cube.style.width = `${size}px`;
-                cube.style.height = `${size}px`;
-
-                
-                const leftPosition = Math.random() * screenWidth;
-                cube.style.left = `${leftPosition}px`;
-
-                
-                const fallDuration = Math.random() * 3 + 5; 
-                cube.style.animation = `fall ${fallDuration}s linear infinite`;
-
-                
-                rainContainer.appendChild(cube);
+                    const cube = document.createElement('div');
+                    cube.classList.add('cube');
+                    
+                    
+                    const size = Math.random() * 20 + 10; 
+                    cube.style.width = `${size}px`;
+                    cube.style.height = `${size}px`;
+                    
+                    const leftPosition = Math.random() * screenWidth;
+                    cube.style.left = `${leftPosition}px`;
+                    
+                    const fallDuration = Math.random() * 3 + 7; 
+                    cube.style.animation = `fall ${fallDuration}s linear infinite`;
+                    
+                    rainContainer.appendChild(cube);
+                }, Math.random() * 10000);
             }
         }
 
