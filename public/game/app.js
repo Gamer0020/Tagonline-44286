@@ -1,12 +1,9 @@
-// Import the functions you need from the SDKs you need
+// Import Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-import { getAuth, signInAnonymously, onAuthStateChanged, deleteUser } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-import { getDatabase, ref, set, get, push, onValue, onDisconnect, remove, onChildAdded, update, onChildRemoved } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
+import { getAuth, signInAnonymously, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+import { getDatabase, ref, set, update, onValue, onDisconnect, onChildAdded, onChildRemoved } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
 
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDViTqc4QOkpqX0wAdBV0rLlKt2iMK3bz8",
   authDomain: "tagonline-44286.firebaseapp.com",
@@ -18,166 +15,125 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const database = getDatabase(app);
 
-
 // Game variables
 const gameContainer = document.getElementById("game-container");
-
-let GRIDSIZE;
 const numOfCell = 20;
-
-
+let GRIDSIZE;
 let playerId;
 let playerRef;
 let players = {};
 let playerElements = {};
+let taggerId = null;
 
-if (window.innerWidth > window.innerHeight) {
-  gameContainer.style.width = `${window.innerHeight-20}px`;
-  gameContainer.style.height = `${window.innerHeight-20}px`;
-} else if (window.innerWidth < window.innerHeight) {
-  gameContainer.style.width = `${window.innerWidth-20}px`;
-  gameContainer.style.height = `${window.innerWidth-20}px`;
+// Ajustement de la taille de la grille
+function adjustGridSize() {
+  let size = Math.min(window.innerWidth, window.innerHeight) - 20;
+  gameContainer.style.width = `${size}px`;
+  gameContainer.style.height = `${size}px`;
+  GRIDSIZE = size / numOfCell;
 }
+adjustGridSize();
+window.addEventListener("resize", adjustGridSize);
 
-GRIDSIZE = (window.innerHeight-20) / numOfCell;
+// Forcer un nouvel utilisateur par onglet
+setPersistence(auth, browserSessionPersistence)
+  .then(() => signInAnonymously(auth))
+  .catch(console.error);
 
-// Quand le statut de l'utilisateur change (typiquement quand le joueur se co ou se déco)
+// Gestion de l'authentification anonyme
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    //User logged in
     playerId = user.uid;
-    playerRef = ref(database, `players/${playerId}`)
-
-    console.log(playerId);
+    console.log("Player ID:", playerId);
+    playerRef = ref(database, `players/${playerId}`);
     
-    set(playerRef, {
-      id: playerId,
-      name: "Anonyme",
-      x: 0,
-      y: 0
-    }).catch((error) => {console.log(error)})
-
-    onDisconnect(playerRef).remove(playerRef)
-
+    set(playerRef, { id: playerId, x: 0, y: 0, isTagger: false }).catch(console.error);
+    onDisconnect(playerRef).remove();
+    
     initGame();
-
-  } else {
-    // User logged out
-    console.log("Logged out")
   }
 });
 
-signInAnonymously(auth).catch((error) => {
-  console.log(error.code, error.message);
-});
-
-
 function initGame() {
-  const allPlayersRef = ref(database, `players`)
-
+  const allPlayersRef = ref(database, "players");
   onValue(allPlayersRef, (snapshot) => {
-    //Fires whenever a change occurs
     players = snapshot.val() || {};
-    Object.keys(players).forEach((key) => {
-      const characterState = players[key];
-      let element = playerElements[key];
-      element.style.transform = `translate(${characterState["x"]*GRIDSIZE}px, ${characterState["y"]*GRIDSIZE}px)`
-      
-    });
+    Object.keys(players).forEach(updatePlayerPosition);
   });
 
   onChildAdded(allPlayersRef, (snapshot) => {
     const addedPlayer = snapshot.val();
-    const characterElement = document.createElement("div");
-    //create the "real" player with style
-    characterElement.classList.add("player");
-    characterElement.id = addedPlayer.id;
-    characterElement.style.width = `${GRIDSIZE-4}px`;
-    characterElement.style.height = `${GRIDSIZE-4}px`;
-    
-    if (addedPlayer.id === playerId) {
-      //more style for the current player...
-    }
-    
-    characterElement.innerHTML = `
-    <div class="name-container"></div>
-    `
-    gameContainer.appendChild(characterElement);
-    playerElements[addedPlayer.id] = characterElement;
+    createPlayerElement(addedPlayer);
+    if (!taggerId) setTagger(addedPlayer.id);
   });
 
   onChildRemoved(allPlayersRef, (snapshot) => {
-    console.log(`Child removed ${snapshot}`);
-    const removedPlayer = snapshot.val();
-    gameContainer.removeChild(document.getElementById(removedPlayer["id"]));
+    removePlayerElement(snapshot.val().id);
   });
-
-  document.addEventListener("keydown", (event) => {
-    console.log(event);
-    switch (event.key) {
-      case "ArrowLeft":
-        keyPressHandler(-1);
-        break;
-    
-      case "ArrowRight":
-        keyPressHandler(1);
-        break;
-      
-      case "ArrowDown":
-        keyPressHandler(0, 1);
-        break;
-
-      case "ArrowUp":
-        keyPressHandler(0, -1);
-        break;
-      
-      default:
-        break;
-    }
-  });
-  
 }
 
-function keyPressHandler(deltaX=0, deltaY=0) { // C'est là qu'il faut gérer les déplacements du joueur.
-  let newX = players[playerId]["x"] + deltaX;
-  let newY = players[playerId]["y"] + deltaY;
-  if (0 <= newX && newX < numOfCell && 0 <= newY && newY < numOfCell) {
-    update(playerRef, {x: newX, y: newY});
+function createPlayerElement(player) {
+  const characterElement = document.createElement("div");
+  characterElement.classList.add("player");
+  characterElement.id = player.id;
+  characterElement.style.width = `${GRIDSIZE - 4}px`;
+  characterElement.style.height = `${GRIDSIZE - 4}px`;
+  updatePlayerStyle(characterElement, player);
+  gameContainer.appendChild(characterElement);
+  playerElements[player.id] = characterElement;
+}
+
+function updatePlayerPosition(id) {
+  const player = players[id];
+  if (!playerElements[id]) return;
+  playerElements[id].style.transform = `translate(${player.x * GRIDSIZE}px, ${player.y * GRIDSIZE}px)`;
+  updatePlayerStyle(playerElements[id], player);
+}
+
+function updatePlayerStyle(element, player) {
+  element.style.backgroundColor = player.isTagger ? "red" : "blue";
+}
+
+function removePlayerElement(id) {
+  if (playerElements[id]) {
+    gameContainer.removeChild(playerElements[id]);
+    delete playerElements[id];
   }
 }
 
-window.addEventListener("beforeunload", (event) => {
+function setTagger(id) {
+  taggerId = id;
+  update(ref(database, `players/${id}`), { isTagger: true });
+}
 
+document.addEventListener("keydown", (event) => {
+  let deltaX = 0, deltaY = 0;
+  if (event.key === "ArrowLeft") deltaX = -1;
+  if (event.key === "ArrowRight") deltaX = 1;
+  if (event.key === "ArrowUp") deltaY = -1;
+  if (event.key === "ArrowDown") deltaY = 1;
+  movePlayer(deltaX, deltaY);
 });
 
-window.addEventListener("resize", event => {
-  let vw = window.innerWidth-20;
-  let vh = window.innerHeight-20;
-
-  let nx = vw; //On crée les dimensions du game-container
-  let ny = vh;
-  if (vw > vh) { //On crée un carré en fonction de l'oritentation du viewport
-    nx = ny;
-  } else if (vh > vw) {
-    ny = nx;
+function movePlayer(dx, dy) {
+  let newX = players[playerId]?.x + dx;
+  let newY = players[playerId]?.y + dy;
+  if (newX >= 0 && newX < numOfCell && newY >= 0 && newY < numOfCell) {
+    update(playerRef, { x: newX, y: newY });
+    checkTagCollision();
   }
+}
 
-  gameContainer.style.width = `${nx}px`;
-  gameContainer.style.height = `${ny}px`;
-  GRIDSIZE = nx / numOfCell;
-
-  document.querySelectorAll(".player").forEach((value) => {
-    value.style.width = `${GRIDSIZE-4}px`;
-    value.style.height = `${GRIDSIZE-4}px`;
-    let x = players[value.id]["x"];
-    let y = players[value.id]["y"];
-    
-    value.style.transform = `translate(${x*GRIDSIZE}px, ${y*GRIDSIZE}px)`;
-  });
-
-});
+function checkTagCollision() {
+  if (playerId === taggerId) {
+    Object.values(players).forEach((player) => {
+      if (player.id !== taggerId && player.x === players[taggerId].x && player.y === players[taggerId].y) {
+        setTagger(player.id);
+      }
+    });
+  }
+}
