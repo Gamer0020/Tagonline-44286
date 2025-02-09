@@ -68,11 +68,25 @@
             border-radius: 5px;
             font-weight: bold;
             text-align: center;
+            animation: bounce 1s linear infinite;
+        }
+
+        @keyframes bounce {
+            50% {
+                width: 210px;
+                height: 52px;
+                font-size: 26px;
+            }
         }
 
         .play-button::before {
             content: '▶';
-            font-size: 24px;
+            font-size: 30px;
+            transition: transform 300ms ease;
+        }
+
+        .play-button:hover::before {
+            transform: rotate(1turn);
         }
 
         .play-button:hover {
@@ -94,6 +108,7 @@
             position: absolute;
             background: yellow;
             border: 2px solid black;
+            border-radius: 2px;
             opacity: 1; /* Aucun mélange avec le fond */
         }
 
@@ -115,12 +130,12 @@
        
         function generateCubes() {
             const rainContainer = document.getElementById('rain-container');
-            const numCubes = 50;  
+            const numCubes = 100;  
             const screenWidth = window.innerWidth;
             const screenHeight = window.innerHeight;
 
             for (let i = 0; i < numCubes; i++) {
-                setTimeout(() => {
+                setTimeout(() => { // Les cubes viennent pas tous en même temp
 
                     const cube = document.createElement('div');
                     cube.classList.add('cube');
@@ -137,7 +152,7 @@
                     cube.style.animation = `fall ${fallDuration}s linear infinite`;
                     
                     rainContainer.appendChild(cube);
-                }, Math.random() * 10000);
+                }, Math.random() * 9000);
             }
         }
 
