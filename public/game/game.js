@@ -134,7 +134,7 @@ function initGame() {
 }
 
 function keyPressHandler(deltaX=0, deltaY=0) { // C'est là qu'il faut gérer les déplacements du joueur.
-  console.log(getSeconds());
+  console.log(new Date().getTime());
   let newX = players[playerId]["x"] + deltaX;
   let newY = players[playerId]["y"] + deltaY;
   if (0 <= newX && newX < numOfCell && 0 <= newY && newY < numOfCell) {
