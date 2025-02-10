@@ -48,7 +48,7 @@ onAuthStateChanged(auth, (user) => {
     
     set(playerRef, {
       id: playerId,
-      name: "Anonyme",
+      name: playerId,
       x: 0,
       y: 0,
       isIt: false
@@ -79,8 +79,16 @@ function initGame() {
       const characterState = players[key];
       let element = playerElements[key];
       element.style.transform = `translate(${characterState["x"]*GRIDSIZE}px, ${characterState["y"]*GRIDSIZE}px)`;
-      if (characterState["isIt"]) {
+      if (characterState["isIt"]) { // Si c'est it
         element.style.border = "red 3px solid";
+        Object.keys(players).forEach((Id) => { //On cherche si un autre cube est sur la même case que lui
+          if (Id != key) {
+            if (players[Id]["x"] == characterState["x"] && players[Id]["y"] == characterState["y"]) {
+              update(ref(database, `players/${Id}`), {isIt: true}); // Le seul poblème, c'est que tout les joueurs update en même temps.
+              update(ref(database, `players/${key}`), {isIt: false}) // Ducoup ça bug, il faudrait utiliser Cloud Functions, ou faire que seulement celui qui est IT gère son truc.
+            }
+          }
+        });
       } else {
         element.style.border = "3px black solid";
       }
@@ -141,7 +149,7 @@ function initGame() {
 
 function keyPressHandler(deltaX=0, deltaY=0) { // C'est là qu'il faut gérer les déplacements du joueur.
   let time = new Date().getTime();
-  if (time - lastPress < 200) { // Je sais pas trop quelle valeur mettre ici parce que si c'est trop bas ça sert à rien mais si c'est trop haut c'est chiant
+  if (time - lastPress < 0) { // Je sais pas trop quelle valeur mettre ici parce que si c'est trop bas ça sert à rien mais si c'est trop haut c'est chiant
     return; // Pour pas que le joueur spam
   } else {
     lastPress = time;
