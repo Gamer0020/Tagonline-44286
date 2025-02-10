@@ -22,7 +22,7 @@ body {
 
 .player {
     background-color: yellow;
-    border: 2px black solid;
+    border: 3px black solid;
     position: absolute;
     transition: transform 0.2s;
     border-radius: 3px;

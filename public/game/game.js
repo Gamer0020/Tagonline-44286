@@ -25,6 +25,7 @@ let playerId;
 let playerRef;
 let players = {};
 let playerElements = {};
+let lastPress = 0;
 
 if (window.innerWidth > window.innerHeight) {
   gameContainer.style.width = `${window.innerHeight-20}px`;
@@ -49,7 +50,8 @@ onAuthStateChanged(auth, (user) => {
       id: playerId,
       name: "Anonyme",
       x: 0,
-      y: 0
+      y: 0,
+      isIt: false
     }).catch((error) => {console.log(error)})
 
     onDisconnect(playerRef).remove(playerRef)
@@ -76,7 +78,12 @@ function initGame() {
     Object.keys(players).forEach((key) => {
       const characterState = players[key];
       let element = playerElements[key];
-      element.style.transform = `translate(${characterState["x"]*GRIDSIZE}px, ${characterState["y"]*GRIDSIZE}px)`
+      element.style.transform = `translate(${characterState["x"]*GRIDSIZE}px, ${characterState["y"]*GRIDSIZE}px)`;
+      if (characterState["isIt"]) {
+        element.style.border = "red 3px solid";
+      } else {
+        element.style.border = "3px black solid";
+      }
       
     });
   });
@@ -87,8 +94,8 @@ function initGame() {
     //create the "real" player with style
     characterElement.classList.add("player");
     characterElement.id = addedPlayer.id;
-    characterElement.style.width = `${GRIDSIZE-4}px`;
-    characterElement.style.height = `${GRIDSIZE-4}px`;
+    characterElement.style.width = `${GRIDSIZE-6}px`;
+    characterElement.style.height = `${GRIDSIZE-6}px`;
     
     if (addedPlayer.id === playerId) {
       //more style for the current player...
@@ -108,7 +115,6 @@ function initGame() {
   });
 
   document.addEventListener("keydown", (event) => {
-    console.log(event);
     switch (event.key) {
       case "ArrowLeft":
         keyPressHandler(-1);
@@ -134,7 +140,12 @@ function initGame() {
 }
 
 function keyPressHandler(deltaX=0, deltaY=0) { // C'est là qu'il faut gérer les déplacements du joueur.
-  console.log(getSeconds());
+  let time = new Date().getTime();
+  if (time - lastPress < 200) { // Je sais pas trop quelle valeur mettre ici parce que si c'est trop bas ça sert à rien mais si c'est trop haut c'est chiant
+    return; // Pour pas que le joueur spam
+  } else {
+    lastPress = time;
+  }
   let newX = players[playerId]["x"] + deltaX;
   let newY = players[playerId]["y"] + deltaY;
   if (0 <= newX && newX < numOfCell && 0 <= newY && newY < numOfCell) {
