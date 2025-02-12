@@ -26,6 +26,7 @@ let playerRef;
 let players = {};
 let playerElements = {};
 let lastPress = 0;
+let lastGive = 0;
 
 if (window.innerWidth > window.innerHeight) {
   gameContainer.style.width = `${window.innerHeight-20}px`;
@@ -51,7 +52,8 @@ onAuthStateChanged(auth, (user) => {
       name: playerId,
       x: 0,
       y: 0,
-      isIt: false
+      isIt: false,
+      isInvincible: false
     }).catch((error) => {console.log(error)})
 
     onDisconnect(playerRef).remove(playerRef)
@@ -75,20 +77,26 @@ function initGame() {
   onValue(allPlayersRef, (snapshot) => {
     //Fires whenever a change occurs
     players = snapshot.val() || {};
+    console.log(new Date().getTime() - lastGive);
     Object.keys(players).forEach((key) => {
       const characterState = players[key];
       let element = playerElements[key];
       element.style.transform = `translate(${characterState["x"]*GRIDSIZE}px, ${characterState["y"]*GRIDSIZE}px)`;
       if (characterState["isIt"]) { // Si c'est it
         element.style.border = "red 3px solid";
-        Object.keys(players).forEach((Id) => { //On cherche si un autre cube est sur la même case que lui
-          if (Id != key) {
-            if (players[Id]["x"] == characterState["x"] && players[Id]["y"] == characterState["y"]) {
-              update(ref(database, `players/${Id}`), {isIt: true}); // Le seul poblème, c'est que tout les joueurs update en même temps.
-              update(ref(database, `players/${key}`), {isIt: false}) // Ducoup ça bug, il faudrait utiliser Cloud Functions, ou faire que seulement celui qui est IT gère son truc.
+        if (key === playerId) { // Si c'est le joueur actuel
+          Object.keys(players).forEach((Id) => { //On cherche si on est sur la même case que lui
+            if (Id != key) {
+              if (players[Id]["x"] == characterState["x"] && players[Id]["y"] == characterState["y"] && !players[Id]["isInvincible"]) { //Si le joueur est sur la même case mais n'est plus invincible
+                console.log("Giving the bomb");
+                lastGive = new Date().getTime();
+                update(playerRef, {isIt: false, isInvincible: true});
+                update(ref(database, `players/${Id}`), {isIt: true});
+                setTimeout(() => {update(playerRef, {isInvincible: false})}, 3000);
+              }
             }
-          }
-        });
+          });
+        }
       } else {
         element.style.border = "3px black solid";
       }

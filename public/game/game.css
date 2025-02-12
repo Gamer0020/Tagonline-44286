@@ -29,7 +29,7 @@ body {
 }
 
 .arrow {
-    background-image: url('assets/Arrow.ico');
+    /* background-image: url('../assets/Arrow.ico'); */
     width: 100px;
     height: 100px;
     position: relative;
