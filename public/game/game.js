@@ -13,11 +13,11 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const database = getDatabase(app);
 
-
 // Game variables
 const gameContainer = document.getElementById("game-container");
 
 let GRIDSIZE;
+let BORDERSIZE;
 const numOfCell = 20;
 
 
@@ -28,15 +28,7 @@ let playerElements = {};
 let lastPress = 0;
 let lastGive = 0;
 
-if (window.innerWidth > window.innerHeight) {
-  gameContainer.style.width = `${window.innerHeight-20}px`;
-  gameContainer.style.height = `${window.innerHeight-20}px`;
-} else if (window.innerWidth < window.innerHeight) {
-  gameContainer.style.width = `${window.innerWidth-20}px`;
-  gameContainer.style.height = `${window.innerWidth-20}px`;
-}
-
-GRIDSIZE = (window.innerHeight-20) / numOfCell;
+resize();
 
 // Quand le statut de l'utilisateur change (typiquement quand le joueur se co ou se déco)
 onAuthStateChanged(auth, (user) => {
@@ -50,8 +42,8 @@ onAuthStateChanged(auth, (user) => {
     set(playerRef, {
       id: playerId,
       name: playerId,
-      x: 0,
-      y: 0,
+      x: Math.floor(Math.random() * numOfCell),
+      y: Math.floor(Math.random() * numOfCell),
       isIt: false,
       isInvincible: false
     }).catch((error) => {console.log(error)})
@@ -77,34 +69,43 @@ function initGame() {
   onValue(allPlayersRef, (snapshot) => {
     //Fires whenever a change occurs
     players = snapshot.val() || {};
-    console.log(new Date().getTime() - lastGive);
+    if (Object.keys(players).length == 1) {
+      update(playerRef, {isIt: true});
+    }
+
     Object.keys(players).forEach((key) => {
       const characterState = players[key];
       let element = playerElements[key];
       element.style.transform = `translate(${characterState["x"]*GRIDSIZE}px, ${characterState["y"]*GRIDSIZE}px)`;
       if (characterState["isIt"]) { // Si c'est it
-        element.style.border = "red 3px solid";
+        element.style.border = `${element.style.border.split(" ")[0]} ${element.style.border.split(" ")[1]} red`;
         if (key === playerId) { // Si c'est le joueur actuel
-          Object.keys(players).forEach((Id) => { //On cherche si on est sur la même case que lui
-            if (Id != key) {
-              if (players[Id]["x"] == characterState["x"] && players[Id]["y"] == characterState["y"] && !players[Id]["isInvincible"]) { //Si le joueur est sur la même case mais n'est plus invincible
-                console.log("Giving the bomb");
-                lastGive = new Date().getTime();
-                update(playerRef, {isIt: false, isInvincible: true});
-                update(ref(database, `players/${Id}`), {isIt: true});
-                setTimeout(() => {update(playerRef, {isInvincible: false})}, 3000);
-              }
-            }
-          });
+          giveBomb(characterState, key);
         }
       } else {
-        element.style.border = "3px black solid";
+        element.style.border = `${element.style.border.split(" ")[0]} ${element.style.border.split(" ")[1]} black`;
       }
       
     });
   });
 
+  function giveBomb(player, key) {
+    Object.keys(players).forEach((Id) => {
+      let x = player["x"];
+      let y = player["y"];
+      if (Id != key) {
+        if (players[Id]["x"] == x && players[Id]["y"] == y && !players[Id]["isInvincible"]) {
+          lastGive = new Date().getTime();
+          update(playerRef, {isIt: false, isInvincible: true});
+          update(ref(database, `players/${Id}`), {isIt: true});
+          setTimeout(() => {update(playerRef, {isInvincible: false})}, 300);
+        }
+      }
+    });
+  }
+
   onChildAdded(allPlayersRef, (snapshot) => {
+    //On ajoute un joueur
     const addedPlayer = snapshot.val();
     const characterElement = document.createElement("div");
     //create the "real" player with style
@@ -112,6 +113,8 @@ function initGame() {
     characterElement.id = addedPlayer.id;
     characterElement.style.width = `${GRIDSIZE-6}px`;
     characterElement.style.height = `${GRIDSIZE-6}px`;
+    characterElement.style.border = `${BORDERSIZE}px solid black`;
+    
     
     if (addedPlayer.id === playerId) {
       //more style for the current player...
@@ -125,7 +128,6 @@ function initGame() {
   });
 
   onChildRemoved(allPlayersRef, (snapshot) => {
-    console.log(`Child removed ${snapshot}`);
     const removedPlayer = snapshot.val();
     gameContainer.removeChild(document.getElementById(removedPlayer["id"]));
   });
@@ -133,11 +135,11 @@ function initGame() {
   document.addEventListener("keydown", (event) => {
     switch (event.key) {
       case "ArrowLeft":
-        keyPressHandler(-1);
+        keyPressHandler(-1, 0);
         break;
     
       case "ArrowRight":
-        keyPressHandler(1);
+        keyPressHandler(1, 0);
         break;
       
       case "ArrowDown":
@@ -169,33 +171,59 @@ function keyPressHandler(deltaX=0, deltaY=0) { // C'est là qu'il faut gérer le
   }
 }
 
-window.addEventListener("beforeunload", (event) => {
 
+window.addEventListener("resize", (e) => {
+  resize();
 });
 
-window.addEventListener("resize", event => {
-  let vw = window.innerWidth-20;
-  let vh = window.innerHeight-20;
-
-  let nx = vw; //On crée les dimensions du game-container
-  let ny = vh;
-  if (vw > vh) { //On crée un carré en fonction de l'oritentation du viewport
-    nx = ny;
-  } else if (vh > vw) {
-    ny = nx;
+function resize() {
+  console.log("resize");
+  let viewPortWidth = window.innerWidth-20;
+  let viewPortHeight = window.innerHeight-20;
+  
+  let newX = viewPortWidth; //On crée les dimensions du game-container
+  let newY = viewPortHeight;
+  if (viewPortWidth > viewPortHeight) { //On crée un carré en fonction de l'oritentation du viewport
+    newX = newY;
+  } else if (viewPortHeight > viewPortWidth) {
+    newY = newX;
   }
-
-  gameContainer.style.width = `${nx}px`;
-  gameContainer.style.height = `${ny}px`;
-  GRIDSIZE = nx / numOfCell;
-
+  
+  gameContainer.style.width = `${newX}px`;
+  gameContainer.style.height = `${newY}px`;
+  GRIDSIZE = newX / numOfCell;
+  BORDERSIZE = Math.floor(GRIDSIZE / 6);
+  if (BORDERSIZE < 1) {
+    BORDERSIZE = 1;
+  }
   document.querySelectorAll(".player").forEach((value) => {
-    value.style.width = `${GRIDSIZE-4}px`;
-    value.style.height = `${GRIDSIZE-4}px`;
+    value.style.width = `${GRIDSIZE-BORDERSIZE*2}px`;
+    value.style.height = `${GRIDSIZE-BORDERSIZE*2}px`;
+    value.style.border = `${BORDERSIZE}px solid ${value.style.border.split(" ")[2]}`;
     let x = players[value.id]["x"];
     let y = players[value.id]["y"];
     
     value.style.transform = `translate(${x*GRIDSIZE}px, ${y*GRIDSIZE}px)`;
   });
+  
+}
+
+document.getElementById("arrow-left").addEventListener("click", () => {
+  keyPressHandler(-1, 0);
+});
+
+document.getElementById("arrow-right").addEventListener("click", () => {
+  keyPressHandler(1, 0);
+});
+
+document.getElementById("arrow-down").addEventListener("click", () => {
+  keyPressHandler(0, 1);
+});
+
+document.getElementById("arrow-up").addEventListener("click", () => {
+  keyPressHandler(0, -1);
+});
+
+window.addEventListener("beforeunload", (event) => {
 
 });

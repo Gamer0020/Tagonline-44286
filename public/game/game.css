@@ -14,24 +14,47 @@ body {
     margin-top: 10px;
 }
 
-#arrows-container {
-    position: absolute;
-    height: 500px;
-    width: 500px;
-}
-
 .player {
     background-color: yellow;
-    border: 3px black solid;
+    border: 3px solid black;
     position: absolute;
     transition: transform 0.2s;
     border-radius: 3px;
 }
 
+#arrows-container {
+    left: 0;
+    position: absolute;
+    height: 300px;
+    width: 300px;
+}
+
 .arrow {
-    /* background-image: url('../assets/Arrow.ico'); */
+    background-image: url('../assets/Arrow.ico');
     width: 100px;
     height: 100px;
-    position: relative;
-    left: 100px;
+    position: absolute;
+}
+
+#arrow-up {
+    left: 33%;
+    top: 0;
+    transform: rotate(-90deg);
+}
+
+#arrow-down {
+    left: 33%;
+    bottom: 0;
+    transform: rotate(90deg);
+}
+
+#arrow-left {
+    left: 0;
+    top: 33%;
+    transform: rotate(180deg);
+}
+
+#arrow-right {
+    right: 0%;
+    top: 33%;
 }
