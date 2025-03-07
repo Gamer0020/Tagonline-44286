@@ -31,9 +31,10 @@ body {
 
 .arrow {
     background-image: url('../assets/Arrow.ico');
-    width: 100px;
-    height: 100px;
+    width: 99px;
+    height: 99px;
     position: absolute;
+    border: 1px solid black;
 }
 
 #arrow-up {

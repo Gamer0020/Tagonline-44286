@@ -15,6 +15,7 @@ const database = getDatabase(app);
 
 // Game variables
 const gameContainer = document.getElementById("game-container");
+const arrowsContainer = document.getElementById("arrows-container");
 
 let GRIDSIZE;
 let BORDERSIZE;
@@ -27,6 +28,8 @@ let players = {};
 let playerElements = {};
 let lastPress = 0;
 let lastGive = 0;
+
+let listOfColors = ["FF0", "0F0", "00F", "FAF", "0FF", "AFF", "FFF"];
 
 resize();
 
@@ -44,6 +47,7 @@ onAuthStateChanged(auth, (user) => {
       name: playerId,
       x: Math.floor(Math.random() * numOfCell),
       y: Math.floor(Math.random() * numOfCell),
+      color: listOfColors[Math.floor(Math.random()*listOfColors.length)], // A définir
       isIt: false,
       isInvincible: false
     }).catch((error) => {console.log(error)})
@@ -111,6 +115,7 @@ function initGame() {
     //create the "real" player with style
     characterElement.classList.add("player");
     characterElement.id = addedPlayer.id;
+    characterElement.style.backgroundColor = `#${addedPlayer.color}`;
     characterElement.style.width = `${GRIDSIZE-6}px`;
     characterElement.style.height = `${GRIDSIZE-6}px`;
     characterElement.style.border = `${BORDERSIZE}px solid black`;
@@ -187,6 +192,7 @@ function resize() {
     newX = newY;
   } else if (viewPortHeight > viewPortWidth) {
     newY = newX;
+    arrowsContainer.style.bottom = `${(viewPortHeight - newY)/2}px`;
   }
   
   gameContainer.style.width = `${newX}px`;
