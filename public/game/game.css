@@ -35,7 +35,10 @@ body {
 }
 
 .arrow {
+    width: 33%;
+    height: 33%;
     background-image: url('../assets/Arrow.ico');
+    background-size: cover;
     position: absolute;
     border: 1px solid black;
 }

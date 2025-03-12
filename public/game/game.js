@@ -223,19 +223,28 @@ function resize() {
   
   let newX = viewPortWidth; //On crée les dimensions du game-container
   let newY = viewPortHeight;
-  
+
   //On crée un carré en fonction de l'oritentation du viewport
   if (viewPortWidth > viewPortHeight) { //Mode paysage
     newX = newY;
+
+    arrowsContainer.style.width = `${Math.min((viewPortWidth-newX)/2, viewPortHeight)}px`;
+    arrowsContainer.style.height = `${Math.min((viewPortWidth-newX)/2, viewPortHeight)}px`;
     arrowsContainer.style.left = "0px";
     arrowsContainer.style.top = "unset";
     arrowsContainer.style.bottom = "unset";
+
+
   } else if (viewPortHeight > viewPortWidth) { //Mode portrait
     newY = newX;
+
+    arrowsContainer.style.width = `${Math.min((viewPortHeight-newX)/2, viewPortWidth)}px`;
+    arrowsContainer.style.height = `${Math.min((viewPortHeight-newX)/2, viewPortWidth)}px`;
     arrowsContainer.style.bottom = "0px";
     arrowsContainer.style.left = "unset";
     arrowsContainer.style.top = "unset";
-    console.log("mobile mode");
+
+
   }
   
   gameContainer.style.width = `${newX}px`;
