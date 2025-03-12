@@ -28,6 +28,7 @@ let players = {};
 let playerElements = {};
 let lastPress = 0;
 let lastGive = 0;
+let keyPressed = false;
 
 let listOfColors = ["FF0", "0F0", "00F", "FAF", "0FF", "AFF", "FFF"];
 
@@ -109,6 +110,7 @@ function initGame() {
   }
 
   onChildAdded(allPlayersRef, (snapshot) => {
+    console.log("Child added");
     //On ajoute un joueur
     const addedPlayer = snapshot.val();
     const characterElement = document.createElement("div");
@@ -116,16 +118,18 @@ function initGame() {
     characterElement.classList.add("player");
     characterElement.id = addedPlayer.id;
     characterElement.style.backgroundColor = `#${addedPlayer.color}`;
-    characterElement.style.width = `${GRIDSIZE-6}px`;
-    characterElement.style.height = `${GRIDSIZE-6}px`;
-    characterElement.style.border = `${BORDERSIZE}px solid black`;
+    characterElement.style.width = `${GRIDSIZE-BORDERSIZE*2}px`;
+    characterElement.style.height = `${GRIDSIZE-BORDERSIZE*2}px`;
+    characterElement.style.border = `${BORDERSIZE}px solid ${characterElement.style.border.split(" ")[2]}`;
     
     
     if (addedPlayer.id === playerId) {
       //more style for the current player...
+      characterElement.innerHTML = `<div class="you-pointer"></div>`;
     }
     
     characterElement.innerHTML = `
+    ${characterElement.innerHTML}
     <div class="name-container"></div>
     `
     gameContainer.appendChild(characterElement);
@@ -138,21 +142,28 @@ function initGame() {
   });
 
   document.addEventListener("keydown", (event) => {
+    // if (keyPressed) {
+    //   return;
+    // }
     switch (event.key) {
       case "ArrowLeft":
         keyPressHandler(-1, 0);
+        // keyPressed = true;
         break;
     
       case "ArrowRight":
         keyPressHandler(1, 0);
+        // keyPressed = true;
         break;
       
       case "ArrowDown":
         keyPressHandler(0, 1);
+        // keyPressed = true;
         break;
 
       case "ArrowUp":
         keyPressHandler(0, -1);
+        // keyPressed = true;
         break;
       
       default:
@@ -161,6 +172,29 @@ function initGame() {
   });
   
 }
+
+// document.addEventListener("keyup", (event) => {
+//   switch (event.key) {
+//     case "ArrowLeft":
+//       keyPressed = false;
+//       break;
+  
+//     case "ArrowRight":
+//       keyPressed = false;
+//       break;
+    
+//     case "ArrowDown":
+//       keyPressed = false;
+//       break;
+
+//     case "ArrowUp":
+//       keyPressed = false;
+//       break;
+    
+//     default:
+//       break;
+//   }
+// });
 
 function keyPressHandler(deltaX=0, deltaY=0) { // C'est là qu'il faut gérer les déplacements du joueur.
   let time = new Date().getTime();
@@ -185,20 +219,31 @@ function resize() {
   console.log("resize");
   let viewPortWidth = window.innerWidth-20;
   let viewPortHeight = window.innerHeight-20;
+
   
   let newX = viewPortWidth; //On crée les dimensions du game-container
   let newY = viewPortHeight;
-  if (viewPortWidth > viewPortHeight) { //On crée un carré en fonction de l'oritentation du viewport
+  
+  //On crée un carré en fonction de l'oritentation du viewport
+  if (viewPortWidth > viewPortHeight) { //Mode paysage
     newX = newY;
-  } else if (viewPortHeight > viewPortWidth) {
+    arrowsContainer.style.left = "0px";
+    arrowsContainer.style.top = "unset";
+    arrowsContainer.style.bottom = "unset";
+  } else if (viewPortHeight > viewPortWidth) { //Mode portrait
     newY = newX;
-    arrowsContainer.style.bottom = `${(viewPortHeight - newY)/2}px`;
+    arrowsContainer.style.bottom = "0px";
+    arrowsContainer.style.left = "unset";
+    arrowsContainer.style.top = "unset";
+    console.log("mobile mode");
   }
   
   gameContainer.style.width = `${newX}px`;
   gameContainer.style.height = `${newY}px`;
   GRIDSIZE = newX / numOfCell;
   BORDERSIZE = Math.floor(GRIDSIZE / 6);
+  console.log(GRIDSIZE);
+  console.log(BORDERSIZE);
   if (BORDERSIZE < 1) {
     BORDERSIZE = 1;
   }

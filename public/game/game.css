@@ -22,17 +22,20 @@ body {
     border-radius: 3px;
 }
 
+#timer {
+    font-size: 20px;
+    margin-top: 10px;
+    position: absolute;
+}
+
 #arrows-container {
     left: 0;
+    top: 0;
     position: absolute;
-    height: 300px;
-    width: 300px;
 }
 
 .arrow {
     background-image: url('../assets/Arrow.ico');
-    width: 99px;
-    height: 99px;
     position: absolute;
     border: 1px solid black;
 }
@@ -58,4 +61,15 @@ body {
 #arrow-right {
     right: 0%;
     top: 33%;
+}
+
+.you-pointer {
+    background-color: red;
+    position: relative;
+    top: -70%;
+    left: 25%;
+    width: 50%;
+    height: 40%;
+    border-radius: 20%;
+    clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
 }
