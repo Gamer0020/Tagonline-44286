@@ -82,13 +82,14 @@ function initGame() {
       const characterState = players[key];
       let element = playerElements[key];
       element.style.transform = `translate(${characterState["x"]*GRIDSIZE}px, ${characterState["y"]*GRIDSIZE}px)`;
+      element.style.zIndex = characterState["y"];
       if (characterState["isIt"]) { // Si c'est it
-        element.style.border = `${element.style.border.split(" ")[0]} ${element.style.border.split(" ")[1]} red`;
+        element.style.borderColor = "red";
         if (key === playerId) { // Si c'est le joueur actuel
           giveBomb(characterState, key);
         }
       } else {
-        element.style.border = `${element.style.border.split(" ")[0]} ${element.style.border.split(" ")[1]} black`;
+        element.style.borderColor = "black";
       }
       
     });
@@ -120,7 +121,7 @@ function initGame() {
     characterElement.style.backgroundColor = `#${addedPlayer.color}`;
     characterElement.style.width = `${GRIDSIZE-BORDERSIZE*2}px`;
     characterElement.style.height = `${GRIDSIZE-BORDERSIZE*2}px`;
-    characterElement.style.border = `${BORDERSIZE}px solid ${characterElement.style.border.split(" ")[2]}`;
+    characterElement.style.borderWidth = `${BORDERSIZE}px`;
     
     
     if (addedPlayer.id === playerId) {
@@ -228,8 +229,8 @@ function resize() {
   if (viewPortWidth > viewPortHeight) { //Mode paysage
     newX = newY;
 
-    arrowsContainer.style.width = `${Math.min((viewPortWidth-newX)/2, viewPortHeight)}px`;
-    arrowsContainer.style.height = `${Math.min((viewPortWidth-newX)/2, viewPortHeight)}px`;
+    arrowsContainer.style.width = `${Math.floor(Math.min((viewPortWidth-newX)/2, viewPortHeight*0.8))}px`;
+    arrowsContainer.style.height = `${Math.floor(Math.min((viewPortWidth-newX)/2, viewPortHeight*0.8))}px`;
     arrowsContainer.style.left = "0px";
     arrowsContainer.style.top = "unset";
     arrowsContainer.style.bottom = "unset";
@@ -238,8 +239,8 @@ function resize() {
   } else if (viewPortHeight > viewPortWidth) { //Mode portrait
     newY = newX;
 
-    arrowsContainer.style.width = `${Math.min((viewPortHeight-newX)/2, viewPortWidth)}px`;
-    arrowsContainer.style.height = `${Math.min((viewPortHeight-newX)/2, viewPortWidth)}px`;
+    arrowsContainer.style.width = `${Math.min((viewPortHeight-newX)/2, viewPortWidth/2)}px`;
+    arrowsContainer.style.height = `${Math.min((viewPortHeight-newX)/2, viewPortWidth/2)}px`;
     arrowsContainer.style.bottom = "0px";
     arrowsContainer.style.left = "unset";
     arrowsContainer.style.top = "unset";
@@ -259,7 +260,7 @@ function resize() {
   document.querySelectorAll(".player").forEach((value) => {
     value.style.width = `${GRIDSIZE-BORDERSIZE*2}px`;
     value.style.height = `${GRIDSIZE-BORDERSIZE*2}px`;
-    value.style.border = `${BORDERSIZE}px solid ${value.style.border.split(" ")[2]}`;
+    value.style.borderWidth = `${BORDERSIZE}px`;
     let x = players[value.id]["x"];
     let y = players[value.id]["y"];
     

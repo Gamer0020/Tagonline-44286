@@ -5,6 +5,7 @@ body {
     justify-content: center;
     align-items: center;
     margin: 0;
+    padding: 0;
 }
 
 #game-container {
@@ -12,26 +13,33 @@ body {
     box-shadow: 0 0 20px rgb(63, 61, 61);
     border-radius: 3px;
     margin-top: 10px;
+    transform-style: preserve-3d;
+    z-index: -1;
 }
 
 .player {
-    background-color: yellow;
-    border: 3px solid black;
+    border-style: solid;
     position: absolute;
     transition: transform 0.2s;
     border-radius: 3px;
+    z-index: 1;
+    transform-style: preserve-3d;
 }
 
 #timer {
-    font-size: 20px;
-    margin-top: 10px;
+    margin: auto;
     position: absolute;
+    z-index: -1;
+    top: 10px;
+    font-size: 30px;
+    font-weight: 900;
 }
 
 #arrows-container {
     left: 0;
     top: 0;
     position: absolute;
+    padding: 0;
 }
 
 .arrow {
@@ -40,39 +48,38 @@ body {
     background-image: url('../assets/Arrow.ico');
     background-size: cover;
     position: absolute;
-    border: 1px solid black;
 }
 
 #arrow-up {
-    left: 33%;
+    left: 33.3%;
     top: 0;
     transform: rotate(-90deg);
 }
 
 #arrow-down {
-    left: 33%;
+    left: 33.3%;
     bottom: 0;
     transform: rotate(90deg);
 }
 
 #arrow-left {
     left: 0;
-    top: 33%;
+    top: 33.3%;
     transform: rotate(180deg);
 }
 
 #arrow-right {
     right: 0%;
-    top: 33%;
+    top: 33.3%;
 }
 
 .you-pointer {
     background-color: red;
     position: relative;
-    top: -70%;
+    top: -75%;
     left: 25%;
     width: 50%;
-    height: 40%;
-    border-radius: 20%;
+    height: 50%;
     clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
+    z-index: 2; 
 }
