@@ -30,7 +30,7 @@ let lastPress = 0;
 let lastGive = 0;
 let keyPressed = false;
 
-let listOfColors = ["FF0", "0F0", "00F", "FAF", "0FF", "AFF", "FFF"];
+const listOfColors = ["FF0", "0F0", "00F", "FAF", "0FF", "AFF", "FFF"];
 
 resize();
 
@@ -218,8 +218,8 @@ window.addEventListener("resize", (e) => {
 
 function resize() {
   console.log("resize");
-  let viewPortWidth = window.innerWidth-20;
-  let viewPortHeight = window.innerHeight-20;
+  let viewPortWidth = window.innerWidth-30;
+  let viewPortHeight = window.innerHeight-30;
 
   
   let newX = viewPortWidth; //On crée les dimensions du game-container

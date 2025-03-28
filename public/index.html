@@ -17,16 +17,17 @@
             font-family: Arial, sans-serif;
             text-align: center;
             position: relative;
-            overflow: hidden; 
+            overflow: hidden;
         }
-
+        
         .menu-container {
-            width: 500px;
-            height: 300px;
+            width: 50%;
+            height: 50%;
             display: flex;
             flex-direction: column;
             align-items: center;
-            backdrop-filter: blur(19px) saturate(200%);
+            /* opacity: 80%; */
+            backdrop-filter: blur(8px) saturate(150%);
             -webkit-backdrop-filter: blur(19px) saturate(200%);
             background-color: rgba(255, 255, 255, 0.8);
             border-radius: 12px;
@@ -35,15 +36,16 @@
             position: relative;
             z-index: 1; 
         }
-
+        
         .game-title {
             font-size: 36px;
             font-weight: bold;
             margin-bottom: 20px;
             color: #333;
         }
-
+        
         .card {
+            width: 80%;
             background: white;
             padding: 20px;
             border-radius: 10px;
@@ -51,6 +53,28 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        #play-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .card label {
+            font-size: 30px;
+            font-weight: 800;
+        }
+
+        .card input {
+            width: 80%;
+            height: 40%;
+            padding: 10px;
+            font-size: 20px;
+            border: 3px solid #333;
+            border-radius: 20px;
         }
 
         .play-button {
@@ -68,17 +92,41 @@
             border-radius: 5px;
             font-weight: bold;
             text-align: center;
-            animation: bounce 1s linear infinite;
+            animation: bounce 5s linear infinite;
+            border: #000 2px solid;
         }
 
         @keyframes bounce {
-            50% {
-                width: 210px;
-                height: 52px;
-                font-size: 26px;
+            0%, 53% {
+                transform: scale(1);
+            }
+            60% {
+                animation-timing-function: ease-out;
+                transform: scale(1.05);
+            }
+            62% {
+                transform: scale(1.05) rotate(5deg);
+            }
+            64% {
+                transform:  scale(1.05) rotate(-5deg);
+            }
+            68% {
+                transform: scale(1.05) rotate(3deg);
+            }
+            70% {
+                transform: scale(1.05) rotate(-3deg);
+            }
+
+            72% {
+                transform: scale(1.05) rotate(0);
+            }
+
+            78% {
+                animation-timing-function: ease-out;
+                transform: scale(1);
             }
         }
-
+        
         .play-button::before {
             content: '▶';
             font-size: 30px;
@@ -88,10 +136,22 @@
         .play-button:hover::before {
             transform: rotate(1turn);
         }
-
+        
         .play-button:hover {
             background-color: #ffcc00;
             transition: background-color 0.3s ease;
+        }
+
+        #play-with-friends {
+            height: 100%;
+            font-size: 24px;
+            font-weight: bold;
+            color: #000;
+            background-color: yellow;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            cursor: pointer;
         }
 
         .rain-container {
@@ -122,7 +182,12 @@
     <div class="menu-container">
         <h1 class="game-title">TagOnline</h1>
         <div class="card">
-            <a href="game/game.html" class="play-button">Jouer</a>
+            <label for="pseudo">Pseudo :</label>
+            <input type="text" name="Pseudo" id="pseudo">
+            <div id="play-buttons">
+                <a href="game/game.html" class="play-button">Jouer</a>
+                <button id="play-with-friends">🛠</button>
+            </div>
         </div>
     </div>
 
@@ -135,7 +200,7 @@
             const screenHeight = window.innerHeight;
 
             for (let i = 0; i < numCubes; i++) {
-                setTimeout(() => { // Les cubes viennent pas tous en même temp
+                setTimeout(() => { // Les cubes viennent pas tous en même temps
 
                     const cube = document.createElement('div');
                     cube.classList.add('cube');
@@ -145,7 +210,7 @@
                     cube.style.width = `${size}px`;
                     cube.style.height = `${size}px`;
                     
-                    const leftPosition = Math.random() * screenWidth;
+                    const leftPosition = Math.random() * screenWidth - size/2;
                     cube.style.left = `${leftPosition}px`;
                     
                     const fallDuration = Math.random() * 3 + 7; 
@@ -171,7 +236,7 @@
         `, 0);
 
         
-        window.onload = generateCubes;
+        //window.onload = generateCubes;
     </script>
 </body>
 </html>
