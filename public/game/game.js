@@ -30,8 +30,10 @@ let lastPress = 0;
 let lastGive = 0;
 let keyPressed = false;
 
-const listOfColors = ["FF0", "0F0", "00F", "FAF", "0FF", "AFF", "FFF"];
-
+let listOfColors;
+fetch("../constants.json")
+  .then(response => response.json())
+  .then(json => listOfColors = json);
 resize();
 
 // Quand le statut de l'utilisateur change (typiquement quand le joueur se co ou se déco)

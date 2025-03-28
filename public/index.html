@@ -74,7 +74,7 @@
             padding: 10px;
             font-size: 20px;
             border: 3px solid #333;
-            border-radius: 20px;
+            border-radius: 15px;
         }
 
         .play-button {
@@ -99,30 +99,32 @@
         @keyframes bounce {
             0%, 53% {
                 transform: scale(1);
+                animation-timing-function: cubic-bezier(.2, .95, .3, .95);
             }
             60% {
+                transform: scale(1.1);
+                animation-timing-function: linear;
+            }
+            61% {
+                transform: scale(1.1) rotate(7deg);
+            }
+            63% {
+                transform:  scale(1.1) rotate(-7deg);
+            }
+            65% {
+                transform: scale(1.1) rotate(5deg);
+            }
+            67% {
+                transform: scale(1.1) rotate(-3deg);
                 animation-timing-function: ease-out;
-                transform: scale(1.05);
-            }
-            62% {
-                transform: scale(1.05) rotate(5deg);
-            }
-            64% {
-                transform:  scale(1.05) rotate(-5deg);
-            }
-            68% {
-                transform: scale(1.05) rotate(3deg);
-            }
-            70% {
-                transform: scale(1.05) rotate(-3deg);
             }
 
-            72% {
-                transform: scale(1.05) rotate(0);
+            69% {
+                transform: scale(1.1) rotate(0);
+                animation-timing-function:cubic-bezier(.95, 0, 0, .95);
             }
 
             78% {
-                animation-timing-function: ease-out;
                 transform: scale(1);
             }
         }
@@ -144,11 +146,11 @@
 
         #play-with-friends {
             height: 100%;
-            font-size: 24px;
+            border: 2px solid #000;
+            font-size: 32px;
             font-weight: bold;
             color: #000;
             background-color: yellow;
-            border: none;
             border-radius: 5px;
             padding: 10px;
             cursor: pointer;
@@ -166,7 +168,6 @@
 
         .cube {
             position: absolute;
-            background: yellow;
             border: 2px solid black;
             border-radius: 2px;
             opacity: 1; /* Aucun mélange avec le fond */
@@ -192,8 +193,12 @@
     </div>
 
     <script>
-       
         function generateCubes() {
+            let listOfColors = [];
+            fetch("constants.json")
+                .then(response => response.json())
+                .then(json => listOfColors = json);
+            console.log(listOfColors);
             const rainContainer = document.getElementById('rain-container');
             const numCubes = 100;  
             const screenWidth = window.innerWidth;
@@ -209,6 +214,8 @@
                     const size = Math.random() * 20 + 10; 
                     cube.style.width = `${size}px`;
                     cube.style.height = `${size}px`;
+                    randomNum = Math.floor(Math.random()*listOfColors.length);
+                    cube.style.backgroundColor = `#${listOfColors[randomNum]}`;
                     
                     const leftPosition = Math.random() * screenWidth - size/2;
                     cube.style.left = `${leftPosition}px`;
@@ -217,6 +224,7 @@
                     cube.style.animation = `fall ${fallDuration}s linear infinite`;
                     
                     rainContainer.appendChild(cube);
+                    
                 }, Math.random() * 9000);
             }
         }
@@ -236,7 +244,7 @@
         `, 0);
 
         
-        //window.onload = generateCubes;
+        window.onload = generateCubes;
     </script>
 </body>
 </html>
