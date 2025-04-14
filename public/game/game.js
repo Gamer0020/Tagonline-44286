@@ -271,6 +271,14 @@ function resize() {
   
 }
 
+// document.getElementById("show-arrows").addEventListener("click", () => {
+//   if (arrowsContainer.style.left == "-320px") {
+//     arrowsContainer.style.left = "0px";
+//   } else {
+//     arrowsContainer.style.left = "-320px";
+//   }
+// });
+
 document.getElementById("arrow-left").addEventListener("click", () => {
   keyPressHandler(-1, 0);
 });

@@ -1,0 +1,194 @@
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #00ffff;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.menu-container {
+    width: 50%;
+    height: 80%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    /* opacity: 80%; */
+    backdrop-filter: blur(8px) saturate(150%);
+    -webkit-backdrop-filter: blur(19px) saturate(200%);
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 12px;
+    border: 1px solid rgba(209, 213, 219, 0.3);
+    padding-bottom: 20px;
+    position: relative;
+    z-index: 1; 
+}
+
+.game-title {
+    font-size: 36px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.card {
+    width: 80%;
+    height: 60%;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content:space-evenly;
+    align-items: center;
+    flex-direction: column;
+    gap: 20px;
+}
+
+#pseudo-container {
+    width: 100%;
+    height: 30%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+#pseudo-container label {
+    font-size: 30px;
+    font-weight: 800;
+}
+
+#pseudo-container input {
+    width: 200px;
+    padding: 10px;
+    font-size: 20px;
+    border: 3px solid #333;
+    background-color: #666;
+    color: #fff;
+    border-radius: 15px;
+}
+
+#buttons-container {
+    width: 100%;
+    height: 30%;
+    display: flex;
+    justify-content: space-evenly;
+}
+
+#create-button {
+    width: 40%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    color: rgb(0, 0, 0);
+    background: yellow;
+    text-decoration: none;
+    border: #000 3px solid;
+    border-radius: 5px;
+    font-weight: bold;
+    text-align: center;
+    animation: bounce 5s linear infinite;
+}
+
+@keyframes bounce {
+    0%, 53% {
+        transform: scale(1);
+        animation-timing-function: cubic-bezier(.2, .95, .3, .95);
+    }
+    60% {
+        transform: scale(1.1);
+        animation-timing-function: linear;
+    }
+    61% {
+        transform: scale(1.1) rotate(7deg);
+    }
+    63% {
+        transform:  scale(1.1) rotate(-7deg);
+    }
+    65% {
+        transform: scale(1.1) rotate(5deg);
+    }
+    67% {
+        transform: scale(1.1) rotate(-3deg);
+        animation-timing-function: ease-out;
+    }
+
+    69% {
+        transform: scale(1.1) rotate(0);
+        animation-timing-function:cubic-bezier(.95, 0, 0, .95);
+    }
+
+    78% {
+        transform: scale(1);
+    }
+}
+
+/* #create-button::before {
+    content: '▶';
+    padding-right: 20px;
+    font-size: 30px;
+    transition: transform 300ms ease;
+}
+
+#create-button:hover::before {
+    transform-origin: 0 50%;
+    transform: rotate(1turn);
+} */
+
+#create-button:hover {
+    background-color: #ffcc00;
+    transition: background-color 0.3s ease;
+}
+
+#join-button {
+    width: 40%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    color: rgb(0, 0, 0);
+    background: yellow;
+    text-decoration: none;
+    border: #000 3px solid;
+    border-radius: 5px;
+    font-weight: bold;
+    text-align: center;
+    transition: transform 0.3s ease, color 0.5s; /* Added transition for smooth return */
+}
+
+#join-button:hover {
+    transform: translateY(-5px) scale(1.05);
+    background-color: #ffcc00;
+}
+
+.rain-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0; /* Derrière les autres éléments */
+}
+
+.cube {
+    position: absolute;
+    border: 2px solid black;
+    border-radius: 2px;
+    opacity: 1; /* Aucun mélange avec le fond */
+}
+
+@media (max-width: 768px) {
+    .menu-container {
+        width: 90%; /* Make the menu wider on mobile */
+    }
+}

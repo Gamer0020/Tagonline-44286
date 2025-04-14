@@ -4,177 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="assets/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="index.css">
     <title>TagOnline</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: #00ffff;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .menu-container {
-            width: 50%;
-            height: 50%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            /* opacity: 80%; */
-            backdrop-filter: blur(8px) saturate(150%);
-            -webkit-backdrop-filter: blur(19px) saturate(200%);
-            background-color: rgba(255, 255, 255, 0.8);
-            border-radius: 12px;
-            border: 1px solid rgba(209, 213, 219, 0.3);
-            padding-bottom: 20px;
-            position: relative;
-            z-index: 1; 
-        }
-        
-        .game-title {
-            font-size: 36px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #333;
-        }
-        
-        .card {
-            width: 80%;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        #play-buttons {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-        }
-
-        .card label {
-            font-size: 30px;
-            font-weight: 800;
-        }
-
-        .card input {
-            width: 80%;
-            height: 40%;
-            padding: 10px;
-            font-size: 20px;
-            border: 3px solid #333;
-            border-radius: 15px;
-        }
-
-        .play-button {
-            width: 200px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 10px 20px;
-            font-size: 24px;
-            color: rgb(0, 0, 0);
-            background: yellow;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            text-align: center;
-            animation: bounce 5s linear infinite;
-            border: #000 2px solid;
-        }
-
-        @keyframes bounce {
-            0%, 53% {
-                transform: scale(1);
-                animation-timing-function: cubic-bezier(.2, .95, .3, .95);
-            }
-            60% {
-                transform: scale(1.1);
-                animation-timing-function: linear;
-            }
-            61% {
-                transform: scale(1.1) rotate(7deg);
-            }
-            63% {
-                transform:  scale(1.1) rotate(-7deg);
-            }
-            65% {
-                transform: scale(1.1) rotate(5deg);
-            }
-            67% {
-                transform: scale(1.1) rotate(-3deg);
-                animation-timing-function: ease-out;
-            }
-
-            69% {
-                transform: scale(1.1) rotate(0);
-                animation-timing-function:cubic-bezier(.95, 0, 0, .95);
-            }
-
-            78% {
-                transform: scale(1);
-            }
-        }
-        
-        .play-button::before {
-            content: '▶';
-            font-size: 30px;
-            transition: transform 300ms ease;
-        }
-
-        .play-button:hover::before {
-            transform: rotate(1turn);
-        }
-        
-        .play-button:hover {
-            background-color: #ffcc00;
-            transition: background-color 0.3s ease;
-        }
-
-        #play-with-friends {
-            height: 100%;
-            border: 2px solid #000;
-            font-size: 32px;
-            font-weight: bold;
-            color: #000;
-            background-color: yellow;
-            border-radius: 5px;
-            padding: 10px;
-            cursor: pointer;
-        }
-
-        .rain-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0; /* Derrière les autres éléments */
-        }
-
-        .cube {
-            position: absolute;
-            border: 2px solid black;
-            border-radius: 2px;
-            opacity: 1; /* Aucun mélange avec le fond */
-        }
-
-    </style>
 </head>
+
 <body>
     <!-- Pluie de cubes -->
     <div class="rain-container" id="rain-container"></div>
@@ -183,68 +16,17 @@
     <div class="menu-container">
         <h1 class="game-title">TagOnline</h1>
         <div class="card">
-            <label for="pseudo">Pseudo :</label>
-            <input type="text" name="Pseudo" id="pseudo">
-            <div id="play-buttons">
-                <a href="game/game.html" class="play-button">Jouer</a>
-                <button id="play-with-friends">🛠</button>
+            <div id="pseudo-container">
+                <label for="pseudo">Pseudo :</label>
+                <input type="text" name="Pseudo" id="pseudo">
+            </div>
+            <div id="buttons-container">
+                <div id="create-button">Create</div>
+                <div id="join-button">Join</div>
             </div>
         </div>
     </div>
 
-    <script>
-        function generateCubes() {
-            let listOfColors = [];
-            fetch("constants.json")
-                .then(response => response.json())
-                .then(json => listOfColors = json);
-            console.log(listOfColors);
-            const rainContainer = document.getElementById('rain-container');
-            const numCubes = 100;  
-            const screenWidth = window.innerWidth;
-            const screenHeight = window.innerHeight;
-
-            for (let i = 0; i < numCubes; i++) {
-                setTimeout(() => { // Les cubes viennent pas tous en même temps
-
-                    const cube = document.createElement('div');
-                    cube.classList.add('cube');
-                    
-                    
-                    const size = Math.random() * 20 + 10; 
-                    cube.style.width = `${size}px`;
-                    cube.style.height = `${size}px`;
-                    randomNum = Math.floor(Math.random()*listOfColors.length);
-                    cube.style.backgroundColor = `#${listOfColors[randomNum]}`;
-                    
-                    const leftPosition = Math.random() * screenWidth - size/2;
-                    cube.style.left = `${leftPosition}px`;
-                    
-                    const fallDuration = Math.random() * 3 + 7; 
-                    cube.style.animation = `fall ${fallDuration}s linear infinite`;
-                    
-                    rainContainer.appendChild(cube);
-                    
-                }, Math.random() * 9000);
-            }
-        }
-
-       
-        document.styleSheets[0].insertRule(`
-            @keyframes fall {
-                0% {
-                    transform: translateY(-100px);
-                    opacity: 1;
-                }
-                100% {
-                    transform: translateY(${window.innerHeight + 100}px);
-                    opacity: 1;
-                }
-            }
-        `, 0);
-
-        
-        window.onload = generateCubes;
-    </script>
+    <script src="index.js"></script>
 </body>
 </html>

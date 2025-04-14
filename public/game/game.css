@@ -1,7 +1,7 @@
 body {
     background-color: #00ffff;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     justify-content: center;
     align-items: center;
     margin: 0;
@@ -37,10 +37,11 @@ body {
 }
 
 #arrows-container {
+    position: absolute;
     left: 0;
     top: 0;
-    position: absolute;
     padding: 0;
+    transition: left 1s cubic-bezier(.91,-1,.15,1.4);
 }
 
 .arrow {
@@ -49,6 +50,13 @@ body {
     background-image: url('../assets/Arrow.ico');
     background-size: cover;
     position: absolute;
+}
+
+#show-arrows {
+    left: 0;
+    top: 0;
+    background-color: none;
+    background-image: url("https://cdn-icons-png.flaticon.com/512/59/59098.png");
 }
 
 #arrow-up {
