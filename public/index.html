@@ -12,21 +12,56 @@
     <!-- Pluie de cubes -->
     <div class="rain-container" id="rain-container"></div>
 
-    <!-- Contenu du menu -->
-    <div class="menu-container">
-        <h1 class="game-title">TagOnline</h1>
-        <div class="card">
-            <div id="pseudo-container">
-                <label for="pseudo">Pseudo :</label>
-                <input type="text" name="Pseudo" id="pseudo">
+    <h1 id="game-title">Tag Online</h1>
+    
+    <!-- Container des trois menus-->
+     <div id="menus-container">
+
+         <!-- Page de création de partie -->
+         <div id="create" class="menu-container">
+             <div class="card">
+                <div id="create-rules"></div>
+                <div class="buttons-container">
+                    <div id="create-button" class="button-dynamic">Create</div>
+                    <div class="button-normal back-button">Back</div>
+                </div>
             </div>
-            <div id="buttons-container">
-                <div id="create-button">Create</div>
-                <div id="join-button">Join</div>
+        </div>
+            
+        <!-- Contenu du menu -->
+        <div id="menu" class="menu-container">
+            
+            <!-- formulaire -->
+            <div class="card">
+                <!-- formulaire du pseudo -->
+                <div id="pseudo-container">
+                    <label for="pseudo">Pseudo :</label>
+                    <input type="text" name="Pseudo" id="pseudo" maxlength="20" placeholder="Enter your pseudo">
+                </div>
+                
+                <!-- boutons pour créer ou rejoindre une partie -->
+                <div class="buttons-container">
+                    <div id="to-create-button" class="button-normal">Create</div>
+                    <div id="to-join-button" class="button-normal">Join</div>
+                </div>
+            </div>
+        </div>
+            
+        <!-- Page pour rejoindre une partie -->
+        <div id="join" class="menu-container">
+            <div class="card">
+                <div id="join-container">
+                    <label for="room-id">Room ID:</label>
+                    <input type="text" name="room-id" id="room-id">
+                </div>
+                <div class="buttons-container">
+                    <div class="button-normal back-button">Back</div>
+                    <div id="join-button" class="button-dynamic">Join</div>
+                </div>
             </div>
         </div>
     </div>
-
+    <script src="menu-firebase.js" type="module"></script>
     <script src="index.js"></script>
 </body>
 </html>

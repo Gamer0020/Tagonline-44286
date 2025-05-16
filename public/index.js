@@ -49,4 +49,23 @@ document.styleSheets[0].insertRule(`
 `, 0);
 
 
-// window.onload = generateCubes;
+window.onload = generateCubes;
+
+const toCreateButton = document.getElementById('to-create-button');
+const toJoinButton = document.getElementById('to-join-button');
+const menusContainer = document.getElementById('menus-container');
+const backButtons = document.getElementsByClassName("back-button")
+
+for (let i = 0; i < backButtons.length; i++) {
+    backButtons[i].addEventListener('click', () => {
+        menusContainer.style.left = "-100%";
+    });
+}
+
+toCreateButton.addEventListener('click', () => {
+    menusContainer.style.left = "0";
+});
+
+toJoinButton.addEventListener('click', () => {
+    menusContainer.style.left = "-200%";
+});

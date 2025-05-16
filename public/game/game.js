@@ -36,12 +36,20 @@ fetch("../constants.json")
   .then(json => listOfColors = json);
 resize();
 
+signInAnonymously(auth)
+  .then(() => {
+    console.log("Signed in anonymously");
+  })
+  .catch((error) => {
+  console.log(error.code, error.message);
+});
+
 // Quand le statut de l'utilisateur change (typiquement quand le joueur se co ou se déco)
 onAuthStateChanged(auth, (user) => {
   if (user) {
     //User logged in
     playerId = user.uid;
-    playerRef = ref(database, `players/${playerId}`)
+    playerRef = ref(database, `games/1/players/${playerId}`)
 
     console.log(playerId);
     
@@ -55,7 +63,7 @@ onAuthStateChanged(auth, (user) => {
       isInvincible: false
     }).catch((error) => {console.log(error)})
 
-    onDisconnect(playerRef).remove(playerRef)
+    onDisconnect(playerRef).remove(playerRef);
 
     initGame();
 
@@ -65,13 +73,8 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-signInAnonymously(auth).catch((error) => {
-  console.log(error.code, error.message);
-});
-
-
 function initGame() {
-  const allPlayersRef = ref(database, `players`)
+  const allPlayersRef = ref(database, `games/1/players`)
 
   onValue(allPlayersRef, (snapshot) => {
     //Fires whenever a change occurs
@@ -176,29 +179,6 @@ function initGame() {
   
 }
 
-// document.addEventListener("keyup", (event) => {
-//   switch (event.key) {
-//     case "ArrowLeft":
-//       keyPressed = false;
-//       break;
-  
-//     case "ArrowRight":
-//       keyPressed = false;
-//       break;
-    
-//     case "ArrowDown":
-//       keyPressed = false;
-//       break;
-
-//     case "ArrowUp":
-//       keyPressed = false;
-//       break;
-    
-//     default:
-//       break;
-//   }
-// });
-
 function keyPressHandler(deltaX=0, deltaY=0) { // C'est là qu'il faut gérer les déplacements du joueur.
   let time = new Date().getTime();
   if (time - lastPress < 0) { // Je sais pas trop quelle valeur mettre ici parce que si c'est trop bas ça sert à rien mais si c'est trop haut c'est chiant
@@ -218,6 +198,7 @@ window.addEventListener("resize", (e) => {
   resize();
 });
 
+// Toute la merde qu'on doit faire pour que ça se scale automatiquement
 function resize() {
   console.log("resize");
   let viewPortWidth = window.innerWidth-30;
@@ -293,6 +274,10 @@ document.getElementById("arrow-down").addEventListener("click", () => {
 
 document.getElementById("arrow-up").addEventListener("click", () => {
   keyPressHandler(0, -1);
+});
+
+document.getElementById("exit").addEventListener("click", () => {
+  window.location.href = "../index.html";
 });
 
 window.addEventListener("beforeunload", (event) => {
