@@ -8,6 +8,25 @@ const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 const auth = getAuth(app);
 
+sessionStorage.clear();
+
+const params = new URLSearchParams(window.location.search);
+const error = params.get("error");
+if (error !== null) {
+  switch (error) {
+    case "1":
+      alert("You are already in a game");
+      break;
+    case "2":
+      alert("There was an error with the game ID");
+      break;
+    default:
+      alert("Unknown error");
+  }
+
+  window.location.href = "index.html";
+}
+
 // Sign in anonymously
 signInAnonymously(auth)
   .then(() => {
@@ -51,22 +70,67 @@ function fetchDataOnce(path) {
 var pseudo = document.getElementById("pseudo");
 
 let createButton = document.getElementById("create-button");
-createButton.addEventListener("click", () => {
-  let id = Math.floor(Math.random() * 10);
-  writeData(`games/1`, {
-    id : id,
-    mode: "default",
-    owner: `${pseudo.value == "" ? "Anonymous" : pseudo.value}`,
-    players: {},
+createButton.addEventListener("click", createGame, 0);
+
+async function createGame(numberOfCalls) {
+  let id = Math.floor(Math.random() * 10000);
+
+  await get(ref(database, `games/${id}`)).then((snapshot) => {
+    // Check if the game already exists
+    if (!snapshot.exists()) {
+      console.log("Game does not exist");
+      writeData(`games/${id}`, {
+        id : id,
+        mode: "default",
+        owner: auth.currentUser.uid,
+        players: {},
+      });
+      return;
+    } else {
+      console.log("Game already exists");
+      // If the game exists, try again with a new ID
+      if (numberOfCalls < 100) {
+        createGame(numberOfCalls + 1);
+      } else {
+        console.log("Failed to create game after 100 attempts");
+        return;
+      }
+      return;
+    }
+  }).catch((error) => {
+    console.error("Error fetching game data:", error);
   });
 
-  readData("games/1", (snapshot) => {
-    console.log(snapshot);
-    if (snapshot) {
-      console.log("Game data:", snapshot);
-    } else {
-      console.log("No game data found");
-    }
-    window.location.href = "game/game.html";
-  })
-});
+  // Redirect to the game page
+  sessionStorage.setItem("gameId", id);
+  sessionStorage.setItem("pseudo", pseudo.value == "" ? "Anonymous" : pseudo.value);
+  window.location.href = `game/game.html`;
+}
+
+let joinButton = document.getElementById("join-button");
+joinButton.addEventListener("click", joinGame, 0);
+
+async function joinGame() {
+  let idInput = document.getElementById("room-id");
+  let id = idInput.value;
+
+  await fetchDataOnce(`games/${id}`)
+    .then((data) => {
+      if (data === null) {
+        // Game does not exist
+        console.log("Game does not exist");
+        idInput.classList.remove("input-error-animation");
+        void idInput.offsetWidth; // Trigger reflow
+        idInput.classList.add("input-error-animation");
+      } else {
+        // Game exists
+        console.log("Game exists");
+        sessionStorage.setItem("pseudo", pseudo.value == "" ? "Anonymous" : pseudo.value);
+        sessionStorage.setItem("gameId", id);
+        window.location.href = `game/game.html`;
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching game data:", error);
+    });
+}

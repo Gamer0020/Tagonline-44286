@@ -1,3 +1,9 @@
+let gameId = sessionStorage.getItem("gameId");
+console.log("Game ID : ", gameId);
+if (gameId == null) {
+  window.location.href = "../index.html?error=2";
+}
+
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
 import { getAuth, signInAnonymously, onAuthStateChanged, deleteUser } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
@@ -16,30 +22,28 @@ const database = getDatabase(app);
 // Game variables
 const gameContainer = document.getElementById("game-container");
 const arrowsContainer = document.getElementById("arrows-container");
+const playersInfo = document.getElementById("players-info");
 
 let GRIDSIZE;
 let BORDERSIZE;
 const numOfCell = 20;
 
+const gameRef = `games/${gameId}`;
 
 let playerId;
+let isOwner = false;
 let playerRef;
 let players = {};
 let playerElements = {};
 let lastPress = 0;
 let lastGive = 0;
-let keyPressed = false;
 
 let listOfColors;
-fetch("../constants.json")
+fetch("../colors.json")
   .then(response => response.json())
   .then(json => listOfColors = json);
-resize();
 
 signInAnonymously(auth)
-  .then(() => {
-    console.log("Signed in anonymously");
-  })
   .catch((error) => {
   console.log(error.code, error.message);
 });
@@ -49,13 +53,13 @@ onAuthStateChanged(auth, (user) => {
   if (user) {
     //User logged in
     playerId = user.uid;
-    playerRef = ref(database, `games/1/players/${playerId}`)
+    playerRef = ref(database, `${gameRef}/players/${playerId}`);
 
     console.log(playerId);
     
     set(playerRef, {
       id: playerId,
-      name: playerId,
+      name: sessionStorage.getItem("pseudo") == null ? "Anonymous" : sessionStorage.getItem("pseudo"),
       x: Math.floor(Math.random() * numOfCell),
       y: Math.floor(Math.random() * numOfCell),
       color: listOfColors[Math.floor(Math.random()*listOfColors.length)], // A définir
@@ -63,7 +67,11 @@ onAuthStateChanged(auth, (user) => {
       isInvincible: false
     }).catch((error) => {console.log(error)})
 
-    onDisconnect(playerRef).remove(playerRef);
+    if (isOwner) {
+      onDisconnect(playeerRef).remove(gameRef);
+    } else {
+      onDisconnect(playerRef).remove(playerRef); // Si le joueur se déconnecte, on supprime son joueur de la base de données;
+    }
 
     initGame();
 
@@ -74,14 +82,21 @@ onAuthStateChanged(auth, (user) => {
 });
 
 function initGame() {
-  const allPlayersRef = ref(database, `games/1/players`)
+  const allPlayersRef = ref(database, `${gameRef}/players`);
+  get(ref(database, `${gameRef}/owner`)).then((snapshot) => {
+    console.log(snapshot.val());
+    if (playerId === snapshot.val()) {
+      isOwner = true;
+      console.log("You are the owner of the game");
+      update(playerRef, {isIt: true});
+    }
+  });
+
+  resize();
 
   onValue(allPlayersRef, (snapshot) => {
     //Fires whenever a change occurs
     players = snapshot.val() || {};
-    if (Object.keys(players).length == 1) {
-      update(playerRef, {isIt: true});
-    }
 
     Object.keys(players).forEach((key) => {
       const characterState = players[key];
@@ -90,7 +105,7 @@ function initGame() {
       element.style.zIndex = characterState["y"];
       if (characterState["isIt"]) { // Si c'est it
         element.style.borderColor = "red";
-        if (key === playerId) { // Si c'est le joueur actuel
+        if (isOwner) { // Si c'est le créateur de la partie
           giveBomb(characterState, key);
         }
       } else {
@@ -104,11 +119,11 @@ function initGame() {
     Object.keys(players).forEach((Id) => {
       let x = player["x"];
       let y = player["y"];
-      if (Id != key) {
+      if (Id != key) { // Si c'est pas le joueur qui a la bombe
         if (players[Id]["x"] == x && players[Id]["y"] == y && !players[Id]["isInvincible"]) {
           lastGive = new Date().getTime();
           update(playerRef, {isIt: false, isInvincible: true});
-          update(ref(database, `players/${Id}`), {isIt: true});
+          update(ref(database, `${gameRef}/players/${Id}`), {isIt: true});
           setTimeout(() => {update(playerRef, {isInvincible: false})}, 300);
         }
       }
@@ -116,7 +131,6 @@ function initGame() {
   }
 
   onChildAdded(allPlayersRef, (snapshot) => {
-    console.log("Child added");
     //On ajoute un joueur
     const addedPlayer = snapshot.val();
     const characterElement = document.createElement("div");
@@ -134,9 +148,8 @@ function initGame() {
       characterElement.innerHTML = `<div class="you-pointer"></div>`;
     }
     
-    characterElement.innerHTML = `
-    ${characterElement.innerHTML}
-    <div class="name-container"></div>
+    characterElement.innerHTML += `
+    <div class="name-container">${addedPlayer.name}</div>
     `
     gameContainer.appendChild(characterElement);
     playerElements[addedPlayer.id] = characterElement;
@@ -200,7 +213,6 @@ window.addEventListener("resize", (e) => {
 
 // Toute la merde qu'on doit faire pour que ça se scale automatiquement
 function resize() {
-  console.log("resize");
   let viewPortWidth = window.innerWidth-30;
   let viewPortHeight = window.innerHeight-30;
 
@@ -230,13 +242,15 @@ function resize() {
 
 
   }
+
+  playersInfo.style.width = `${Math.floor(viewPortWidth*0.25)}px`;
   
   gameContainer.style.width = `${newX}px`;
   gameContainer.style.height = `${newY}px`;
   GRIDSIZE = newX / numOfCell;
   BORDERSIZE = Math.floor(GRIDSIZE / 6);
-  console.log(GRIDSIZE);
-  console.log(BORDERSIZE);
+  console.log("Grid size (in px) : ", GRIDSIZE);
+  console.log("Border size (in px) : ", BORDERSIZE);
   if (BORDERSIZE < 1) {
     BORDERSIZE = 1;
   }
@@ -277,9 +291,18 @@ document.getElementById("arrow-up").addEventListener("click", () => {
 });
 
 document.getElementById("exit").addEventListener("click", () => {
+  dispose();
   window.location.href = "../index.html";
 });
 
 window.addEventListener("beforeunload", (event) => {
-
+  dispose();
 });
+
+function dispose() {
+  if (isOwner) {
+    remove(ref(database, `${gameRef}`));
+  } else {
+    remove(playerRef);
+  }
+}

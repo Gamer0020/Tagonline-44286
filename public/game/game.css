@@ -105,3 +105,14 @@ body {
     clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
     z-index: 2; 
 }
+
+#players-info {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 90%;
+    width: 30%;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-left: 3px solid #FFF;
+    margin: 5vh 0;
+}

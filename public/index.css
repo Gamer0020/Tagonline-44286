@@ -212,3 +212,30 @@ input {
         width: 90%; /* Make the menu wider on mobile */
     }
 }
+
+.input-error-animation {
+    animation: inputError 0.2s ease-in-out forwards;
+}
+
+@keyframes inputError {
+    0% {
+        color: red;
+        transform: translate(5px, 0);
+    }
+
+    25% {
+        transform: translate(-5px, 0);
+    }
+
+    50% {
+        transform: translate(5px, 0);
+    }
+
+    75% {
+        transform: translate(-5px, 0);
+    }
+
+    100% {
+        transform: translate(0, 0);
+    }
+}

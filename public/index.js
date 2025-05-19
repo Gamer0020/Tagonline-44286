@@ -1,9 +1,8 @@
 function generateCubes() {
     let listOfColors = [];
-    fetch("constants.json")
+    fetch("colors.json")
         .then(response => response.json())
         .then(json => listOfColors = json);
-    console.log(listOfColors);
     const rainContainer = document.getElementById('rain-container');
     const numCubes = 100;  
     const screenWidth = window.innerWidth;
@@ -25,7 +24,7 @@ function generateCubes() {
             const leftPosition = Math.random() * screenWidth - size/2;
             cube.style.left = `${leftPosition}px`;
             
-            const fallDuration = Math.random() * 3 + 7; 
+            const fallDuration = Math.random() * 5 + 7;
             cube.style.animation = `fall ${fallDuration}s linear infinite`;
             
             rainContainer.appendChild(cube);
