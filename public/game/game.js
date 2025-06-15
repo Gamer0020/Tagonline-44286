@@ -1,3 +1,9 @@
+if (sessionStorage.getItem("quit") == "true") {
+  sessionStorage.removeItem("quit");
+  alert("You have left the game.");
+  window.location.href = "../index.html?error=3";
+}
+
 let gameId = sessionStorage.getItem("gameId");
 console.log("Game ID : ", gameId);
 if (gameId == null) {
@@ -7,7 +13,7 @@ if (gameId == null) {
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
 import { getAuth, signInAnonymously, onAuthStateChanged, deleteUser } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-import { getDatabase, ref, set, get, push, onValue, onDisconnect, remove, onChildAdded, update, onChildRemoved } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
+import { getDatabase, ref, set, get, onDisconnect, remove, onChildAdded, update, onChildRemoved, onChildChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -24,6 +30,9 @@ const gameContainer = document.getElementById("game-container");
 const arrowsContainer = document.getElementById("arrows-container");
 const playersInfo = document.getElementById("players-info");
 
+
+document.getElementById("timer").innerText = `${gameId}`;
+
 let GRIDSIZE;
 let BORDERSIZE;
 const numOfCell = 20;
@@ -36,7 +45,6 @@ let playerRef;
 let players = {};
 let playerElements = {};
 let lastPress = 0;
-let lastGive = 0;
 
 let listOfColors;
 fetch("../colors.json")
@@ -48,7 +56,7 @@ signInAnonymously(auth)
   console.log(error.code, error.message);
 });
 
-// Quand le statut de l'utilisateur change (typiquement quand le joueur se co ou se déco)
+// Quand le statut de l'utilisateur characterState (typiquement quand le joueur se co ou se déco)
 onAuthStateChanged(auth, (user) => {
   if (user) {
     //User logged in
@@ -67,13 +75,14 @@ onAuthStateChanged(auth, (user) => {
       isInvincible: false
     }).catch((error) => {console.log(error)})
 
+    initGame();
+
     if (isOwner) {
-      onDisconnect(playeerRef).remove(gameRef);
+      onDisconnect(playerRef).remove(gameRef);
     } else {
       onDisconnect(playerRef).remove(playerRef); // Si le joueur se déconnecte, on supprime son joueur de la base de données;
     }
 
-    initGame();
 
   } else {
     // User logged out
@@ -83,8 +92,7 @@ onAuthStateChanged(auth, (user) => {
 
 function initGame() {
   const allPlayersRef = ref(database, `${gameRef}/players`);
-  get(ref(database, `${gameRef}/owner`)).then((snapshot) => {
-    console.log(snapshot.val());
+  get(ref(database, `${gameRef}/owner`)).then((snapshot) => {    
     if (playerId === snapshot.val()) {
       isOwner = true;
       console.log("You are the owner of the game");
@@ -92,39 +100,56 @@ function initGame() {
     }
   });
 
-  resize();
-
-  onValue(allPlayersRef, (snapshot) => {
-    //Fires whenever a change occurs
-    players = snapshot.val() || {};
-
-    Object.keys(players).forEach((key) => {
-      const characterState = players[key];
-      let element = playerElements[key];
-      element.style.transform = `translate(${characterState["x"]*GRIDSIZE}px, ${characterState["y"]*GRIDSIZE}px)`;
-      element.style.zIndex = characterState["y"];
-      if (characterState["isIt"]) { // Si c'est it
-        element.style.borderColor = "red";
-        if (isOwner) { // Si c'est le créateur de la partie
-          giveBomb(characterState, key);
-        }
-      } else {
-        element.style.borderColor = "black";
-      }
-      
-    });
+  get(allPlayersRef).then((snapshot) => {
+    players = snapshot.val();
+    if (players == null) {
+      window.location.href = "../index.html?error=1";
+    }
   });
 
-  function giveBomb(player, key) {
+  resize();
+
+  onChildChanged(allPlayersRef, (snapshot) => {
+    //Fires whenever a characterState occurs
+
+    const key = snapshot.key;
+    const characterState = snapshot.val();
+
+    players[key] = characterState;
+
+    let element = playerElements[key];
+    element.style.transform = `translate(${characterState["x"]*GRIDSIZE}px, ${characterState["y"]*GRIDSIZE}px)`;
+    element.style.zIndex = characterState["y"];
+    if (characterState["isIt"]) { // Si c'est it
+      element.style.borderColor = "red";
+    } else {
+      element.style.borderColor = "black";
+    }
+
+    if (isOwner) { // Si c'est le créateur de la partie
+      tryGiveBomb(characterState, key);
+    }
+  });
+
+  // Player est le joueur qui a bougé et key est l'id de ce joueur
+  function tryGiveBomb(player, key) {
+    console.log("Trying to give the bomb to player : ");
     Object.keys(players).forEach((Id) => {
       let x = player["x"];
       let y = player["y"];
-      if (Id != key) { // Si c'est pas le joueur qui a la bombe
+      if (Id != key) { // Si c'est pas le joueur qui a bougé
         if (players[Id]["x"] == x && players[Id]["y"] == y && !players[Id]["isInvincible"]) {
-          lastGive = new Date().getTime();
-          update(playerRef, {isIt: false, isInvincible: true});
-          update(ref(database, `${gameRef}/players/${Id}`), {isIt: true});
-          setTimeout(() => {update(playerRef, {isInvincible: false})}, 300);
+          if (player["isIt"]) {
+            let bombmanRef = ref(database, `${gameRef}/players/${key}`);
+            update(bombmanRef, {isIt: false, isInvincible: true});
+            update(ref(database, `${gameRef}/players/${Id}`), {isIt: true});
+            setTimeout(() => {update(bombmanRef, {isInvincible: false})}, 500);
+          } else if (players[Id]["isIt"]) { // Si le joueur a bougé sur It 
+            let bombmanRef = ref(database, `${gameRef}/players/${Id}`);
+            update(bombmanRef, {isIt: false, isInvincible: true});
+            update(ref(database, `${gameRef}/players/${key}`), {isIt: true});
+            setTimeout(() => {update(bombmanRef, {isInvincible: false})}, 500);
+          }
         }
       }
     });
@@ -132,7 +157,11 @@ function initGame() {
 
   onChildAdded(allPlayersRef, (snapshot) => {
     //On ajoute un joueur
+    
     const addedPlayer = snapshot.val();
+
+    players[snapshot.key] = addedPlayer;
+
     const characterElement = document.createElement("div");
     //create the "real" player with style
     characterElement.classList.add("player");
@@ -141,6 +170,9 @@ function initGame() {
     characterElement.style.width = `${GRIDSIZE-BORDERSIZE*2}px`;
     characterElement.style.height = `${GRIDSIZE-BORDERSIZE*2}px`;
     characterElement.style.borderWidth = `${BORDERSIZE}px`;
+    characterElement.style.borderColor = addedPlayer.isIt ? "red" : "black";
+    characterElement.style.zIndex = addedPlayer.y; // Pour que les joueurs soient empilés correctement
+    characterElement.style.transform = `translate(${addedPlayer.x*GRIDSIZE}px, ${addedPlayer.y*GRIDSIZE}px)`;
     
     
     if (addedPlayer.id === playerId) {
@@ -152,12 +184,26 @@ function initGame() {
     <div class="name-container">${addedPlayer.name}</div>
     `
     gameContainer.appendChild(characterElement);
+
     playerElements[addedPlayer.id] = characterElement;
   });
 
   onChildRemoved(allPlayersRef, (snapshot) => {
     const removedPlayer = snapshot.val();
     gameContainer.removeChild(document.getElementById(removedPlayer["id"]));
+
+    delete players[removedPlayer["id"]];
+    delete playerElements[removedPlayer["id"]];
+    
+    get(ref(database, `${gameRef}/owner`)).then((snapshot) => {
+      console.log("Player removed : ", removedPlayer["id"]);
+      console.log("Owner : ", snapshot.val());
+      if (removedPlayer["id"] === snapshot.val() || snapshot.val() == null) { // Le joueur supprimé est le créateur ou le jeu est détruit.
+        if (!isOwner) {
+          window.location.href = "../index.html?error=1";
+        }
+      }
+    });
   });
 
   document.addEventListener("keydown", (event) => {
@@ -297,11 +343,13 @@ document.getElementById("exit").addEventListener("click", () => {
 
 window.addEventListener("beforeunload", (event) => {
   dispose();
+  //sessionStorage.setItem("quit", true);
 });
 
-function dispose() {
+
+async function dispose() {
   if (isOwner) {
-    remove(ref(database, `${gameRef}`));
+    await remove(ref(database, `${gameRef}`));
   } else {
     remove(playerRef);
   }

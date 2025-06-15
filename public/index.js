@@ -18,7 +18,10 @@ function generateCubes() {
             const size = Math.random() * 20 + 10; 
             cube.style.width = `${size}px`;
             cube.style.height = `${size}px`;
-            randomNum = Math.floor(Math.random()*listOfColors.length);
+            randomNum = Math.ceil(Math.random()*listOfColors.length) - 1; // -1 pour éviter l'index out of bounds
+            if (randomNum === listOfColors.length) {
+                console.log("Error: randomNum is equal to the length of listOfColors");
+            }
             cube.style.backgroundColor = `#${listOfColors[randomNum]}`;
             
             const leftPosition = Math.random() * screenWidth - size/2;
@@ -48,7 +51,7 @@ document.styleSheets[0].insertRule(`
 `, 0);
 
 
-window.onload = generateCubes;
+//window.onload = generateCubes;
 
 const toCreateButton = document.getElementById('to-create-button');
 const toJoinButton = document.getElementById('to-join-button');

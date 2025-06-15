@@ -15,10 +15,13 @@ const error = params.get("error");
 if (error !== null) {
   switch (error) {
     case "1":
-      alert("You are already in a game");
+      alert("The owner of the game has left.");
       break;
     case "2":
-      alert("There was an error with the game ID");
+      alert("There was an error with the game ID. Please try again.");
+      break;
+    case "3":
+      alert("Please do not refresh the game page while playing.");
       break;
     default:
       alert("Unknown error");
@@ -114,7 +117,7 @@ async function joinGame() {
   let idInput = document.getElementById("room-id");
   let id = idInput.value;
 
-  await fetchDataOnce(`games/${id}`)
+  await fetchDataOnce(`games/${id}/mode`)
     .then((data) => {
       if (data === null) {
         // Game does not exist
